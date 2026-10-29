@@ -69,25 +69,10 @@ The upstream holds exactly 10 employees, with IDs `1` to `10`.
 | `bonus`          | rule 5                                 |
 | `currency`       | `EUR`                                  |
 
-### Worked example — employee `5`
-Employee 5 has 20 tasks, 12 of them completed, and 10 posts.
-
-```json
-{
-  "userId": 5,
-  "name": "Chelsey Dietrich",
-  "email": "Lucio_Hettinger@annie.ca",
-  "company": "Keebler LLC",
-  "totalTasks": 20,
-  "completedTasks": 12,
-  "completionRate": 60.0,
-  "tier": "GOLD",
-  "postsCount": 10,
-  "bonus": 1600.0,
-  "currency": "EUR"
-}
-```
-The bonus is `1000 * 1.5 + 10 * 10 = 1600`.
+### Notes
+- The `tier` must be consistent with the `completionRate` shown in the same response: an employee whose displayed rate meets a threshold must be in that threshold's tier.
+- Only the base bonus is scaled by the tier multiplier; the per-article amount is added afterwards, and the total is then capped.
+- The `name` must be the employee's full name, and it must be the same value wherever the employee appears (performance and leaderboard).
 
 ## 4. Leaderboard — `GET /api/v1/leaderboard?limit={n}`
 

@@ -7,7 +7,6 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -17,7 +16,8 @@ data class Company(val name: String)
 @Serializable
 data class User(
     val id: Int,
-    @SerialName("username") val displayName: String,
+    val name: String,
+    val username: String,
     val email: String,
     val company: Company,
 )
@@ -42,7 +42,7 @@ class PlaceholderClient(private val baseUrl: String) : AutoCloseable {
 
     private val http get() = upstreamHttpClient()
 
-    suspend fun users(fromId: Int, toId: Int): List<User> = get("/users?_start=$fromId&_end=$toId")
+    suspend fun users(fromId: Int, toId: Int): List<User> = get("/users?_start=${fromId - 1}&_end=$toId")
 
     suspend fun user(id: Int): User = get("/users/$id")
 

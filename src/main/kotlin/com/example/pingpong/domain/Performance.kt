@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 enum class Tier(val minCompletionRatio: Double, val multiplier: Double) {
     GOLD(0.60, 1.5),
-    SILVER(0.40, 1.2),
+    SILVER(0.40, 1.25),
     BRONZE(0.00, 1.0);
 
     companion object {
@@ -13,13 +13,12 @@ enum class Tier(val minCompletionRatio: Double, val multiplier: Double) {
     }
 }
 
-infix fun Double.boostedBy(tier: Tier): Double = this * tier.multiplier
-
 object BonusCalculator {
     fun calculate(tier: Tier, postsCount: Int): Double {
+        val performanceBonus = AppConfig.BASE_BONUS * tier.multiplier
         val articleBonus = postsCount * AppConfig.BONUS_PER_POST
-        val bonus = articleBonus + AppConfig.BASE_BONUS boostedBy tier
-        return bonus.coerceAtMost(AppConfig.MAX_BONUS).roundTo2()
+        val total = performanceBonus + articleBonus
+        return total.coerceAtMost(AppConfig.MAX_BONUS).roundTo2()
     }
 }
 
@@ -48,10 +47,9 @@ data class LeaderboardEntry(
     val tier: Tier,
 )
 
-val rankingOrder: Comparator<UserPerformance> = compareBy(
-    { it.completionRate },
-    { it.completedTasks },
-    { it.userId },
-)
+val rankingOrder: Comparator<UserPerformance> =
+    compareByDescending<UserPerformance> { it.completionRate }
+        .thenByDescending { it.completedTasks }
+        .thenByDescending { it.userId }
 
 internal fun Double.roundTo2(): Double = Math.round(this * 100) / 100.0

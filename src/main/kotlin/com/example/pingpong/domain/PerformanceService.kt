@@ -2,6 +2,7 @@ package com.example.pingpong.domain
 
 import com.example.pingpong.client.PlaceholderClient
 import com.example.pingpong.client.Todo
+import com.example.pingpong.client.User
 import com.example.pingpong.config.AppConfig
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -20,7 +21,7 @@ class PerformanceService(private val client: PlaceholderClient) {
 
         UserPerformance(
             userId = user.await().id,
-            name = user.await().displayName,
+            name = user.await().name,
             email = user.await().email,
             company = user.await().company.name,
             totalTasks = todos.await().size,
@@ -35,16 +36,15 @@ class PerformanceService(private val client: PlaceholderClient) {
 
     suspend fun leaderboard(limit: Int): List<LeaderboardEntry> = coroutineScope {
         client.users(AppConfig.FIRST_USER_ID, AppConfig.LAST_USER_ID)
-            .map { user -> async { performanceFor(user.id) } }
+            .map { user -> async { user to performanceFor(user.id) } }
             .awaitAll()
-            .sortedWith(rankingOrder)
-            .asReversed()
+            .sortedWith(compareBy(rankingOrder) { it.second })
             .take(limit)
-            .mapIndexed { index, p ->
+            .mapIndexed { index, (user, p) ->
                 LeaderboardEntry(
                     rank = index + 1,
                     userId = p.userId,
-                    name = p.name,
+                    name = user.username,
                     completionRate = p.completionRate,
                     completedTasks = p.completedTasks,
                     tier = p.tier,
@@ -54,7 +54,7 @@ class PerformanceService(private val client: PlaceholderClient) {
 
     private fun completionRatio(todos: List<Todo>): Double {
         if (todos.isEmpty()) return 0.0
-        val weight = 1.0 / todos.size
-        return todos.sumOf { if (it.completed) weight else 0.0 }
+        val perTaskShare = 1.0 / todos.size
+        return todos.fold(0.0) { acc, todo -> if (todo.completed) acc + perTaskShare else acc }
     }
 }
