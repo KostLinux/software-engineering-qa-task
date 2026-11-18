@@ -5,6 +5,10 @@ ARG K6_VERSION=2.4.0
 ARG HURL_VERSION=8.1.0
 ARG KOTLIN_VERSION=2.0.21
 
+# The base image ships a Yarn apt repo whose signing key has expired, which makes
+# `apt-get update` fail (NO_PUBKEY 62D54FD4003F6525). Yarn isn't needed, so drop it.
+RUN rm -f /etc/apt/sources.list.d/yarn*.list
+
 # General QA / HTTP / networking tools
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
