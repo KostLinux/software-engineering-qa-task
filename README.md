@@ -13,12 +13,41 @@ You don't need to install Gradle. The bundled wrapper (`./gradlew`) downloads it
 
 ## Start the app
 
+### Locally
+
 ```bash
 # macOS: select JDK 21 for this shell
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
 ./gradlew run
 ```
+
+### Via GitHub Codespaces
+
+The repository includes a dev container (`.devcontainer/`) with JDK 21, Kotlin, k6, hurl, curl, wget, httpie, jq, newman and Claude Code already installed.
+
+1. On the repository page on GitHub, click **Code → Codespaces → Create codespace on main**.
+   With the GitHub CLI: `gh codespace create --repo <owner>/<repo>`, then `gh codespace code` to open it in VS Code.
+2. Wait for the setup to finish. On first start it downloads Gradle and the dependencies and compiles the project, which takes a few minutes.
+3. In the codespace terminal, run:
+
+   ```bash
+   ./gradlew run
+   ```
+
+4. Port `8080` is forwarded automatically. Open the **Ports** tab to get the public URL (`https://<codespace-name>-8080.app.github.dev`), or call the app from the codespace terminal:
+
+   ```bash
+   curl http://localhost:8080/ping
+   ```
+
+To use Claude Code, either add an `ANTHROPIC_API_KEY` secret under **GitHub → Settings → Codespaces → Secrets**, or run `claude` in the terminal and log in.
+
+> **Rate-limit testing:** run load and rate-limit tests (k6, curl) from inside the codespace against `localhost:8080`. Requests through the forwarded URL all pass through GitHub's proxy, so they don't show the real client IP.
+
+The same dev container also works locally: with Docker running, open the project in VS Code and choose **Dev Containers: Reopen in Container**.
+
+### Server address
 
 The server listens on `http://localhost:8080`. When it is ready, Netty logs `Responding at http://0.0.0.0:8080`.
 

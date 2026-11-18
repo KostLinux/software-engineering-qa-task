@@ -1,0 +1,73 @@
+{
+  "name": "Ping-Pong QA (Kotlin / JDK 21)",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+  "remoteUser": "vscode",
+
+  // Codespaces: Gradle + the Java/Kotlin language servers are memory hungry
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb"
+  },
+
+  // Codespaces: prompts for these when the codespace is created
+  "secrets": {
+    "ANTHROPIC_API_KEY": {
+      "description": "Optional. API key for Claude Code. Leave empty to log in with `claude` instead.",
+      "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/setup"
+    }
+  },
+
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  // Keeps the Claude Code login across local container rebuilds
+  "mounts": [
+    "source=claude-code-config,target=/home/vscode/.claude,type=volume"
+  ],
+
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Ktor app",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // Runs during Codespaces prebuilds too, so dependencies are cached in the prebuild
+  "updateContentCommand": "bash .devcontainer/update-content.sh",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle",
+        "fwcd.kotlin",
+        "humao.rest-client",
+        "redhat.vscode-yaml",
+        "tomoki1207.pdf"
+      ],
+      "settings": {
+        "java.import.gradle.enabled": true,
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "kotlin.languageServer.enabled": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    },
+    "codespaces": {
+      "openFiles": [
+        "README.md",
+        "business_logic.md"
+      ]
+    }
+  }
+}
